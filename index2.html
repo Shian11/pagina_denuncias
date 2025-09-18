@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Denuncia de Corrupción</title>
+
+  <!-- Bootstrap 5 CSS (CDN) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Estilos simples para centrar el formulario de inicio */
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg,#f8f9fa, #e9ecef);
+      padding: 1rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 760px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
+    .required::after {
+      content: " *";
+      color: #dc3545;
+    }
+    /* Vista "panel" (oculta inicialmente) */
+    #panelPrincipal { display: none; }
+  </style>
+</head>
+<body>
+
+  <main class="card">
+    <div class="row g-0">
+      <!-- Izquierda: info / imagen -->
+      <div class="col-md-5 d-none d-md-block bg-dark text-white p-4">
+        <h3 class="fw-bold">Denuncia Ciudadana</h3>
+        <p class="small">Reporta actos de corrupción de forma rápida. Tus datos se usan solo para seguimiento interno.</p>
+        <hr class="border-light">
+        <p class="small mb-0">Confidencialidad y seguridad son prioridades.</p>
+      </div>
+
+      <!-- Derecha: formulario -->
+      <div class="col-md-7 p-4">
+        <!-- Vista de inicio / login -->
+        <section id="inicio">
+          <h4 class="mb-3">Ingresa tus datos</h4>
+          <form id="formInicio" novalidate>
+            <div class="mb-3">
+              <label for="nombres" class="form-label required">Nombres completos</label>
+              <input type="text" class="form-control" id="nombres" name="nombres" minlength="3" required aria-describedby="nombresHelp">
+              <div id="nombresHelp" class="form-text">Escribe tu nombre completo (mínimo 3 caracteres).</div>
+              <div class="invalid-feedback">Por favor ingresa tus nombres completos.</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="dni" class="form-label required">DNI</label>
+              <input type="text" inputmode="numeric" pattern="\d{6,12}" class="form-control" id="dni" name="dni" required aria-describedby="dniHelp">
+              <div id="dniHelp" class="form-text">Número de documento (6–12 dígitos).</div>
+              <div class="invalid-feedback">DNI inválido. Debe contener solo números (6–12 dígitos).</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label required">Correo electrónico</label>
+              <input type="email" class="form-control" id="email" name="email" required aria-describedby="emailHelp">
+              <div id="emailHelp" class="form-text">Usa un correo válido para recibir confirmaciones si hace falta.</div>
+              <div class="invalid-feedback">Por favor ingresa un correo válido.</div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button id="btnEntra" class="btn btn-primary" type="submit">Entra</button>
+            </div>
+          </form>
+
+          <small class="text-muted mt-3 d-block">Tus datos estarán en el navegador por ahora (demo). En producción se deben enviar a un servidor seguro.</small>
+        </section>
+
+        <!-- Panel principal que aparece después de "Entrar" -->
+        <section id="panelPrincipal" class="mt-2">
+          <h4 id="bienvenida"></h4>
+          <p>Bienvenido. Ahora puedes continuar y registrar una denuncia anónima o con datos.</p>
+
+          <div class="d-flex gap-2 mb-3">
+            <button id="btnAbrirDenuncia" class="btn btn-outline-danger">Registrar denuncia</button>
+            <button id="btnCerrarSesion" class="btn btn-secondary">Cerrar sesión</button>
+          </div>
+
+          <!-- Formulario de denuncia simple (no enviado a servidor en este demo) -->
+          <div id="formDenunciaCont" style="display:none;">
+            <form id="formDenuncia" novalidate>
+              <div class="mb-3">
+                <label class="form-label">Tipo de hecho</label>
+                <select class="form-select" id="tipoHecho">
+                  <option value="">Selecciona...</option>
+                  <option>Cohecho / Soborno</option>
+                  <option>Malversación</option>
+                  <option>Negociación incompatible</option>
+                  <option>Otro</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label required">Descripción</label>
+                <textarea class="form-control" id="descripcion" rows="5" minlength="20" required></textarea>
+                <div class="invalid-feedback">Describe el hecho (mínimo 20 caracteres).</div>
+              </div>
+
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="anonimo" />
+                <label class="form-check-label" for="anonimo">Enviar como anónimo (oculta tus datos)</label>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-danger" id="btnEnviarDenuncia" type="submit">Enviar denuncia (demo)</button>
+                <button class="btn btn-outline-secondary" id="btnCancelarDenuncia" type="button">Cancelar</button>
+              </div>
+
+              <div id="msgDenuncia" class="mt-3" style="display:none;"></div>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap JS (bundle incluye Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // --- Utilidades ---
+    const $ = selector => document.querySelector(selector);
+
+    // Validación y manejo del "inicio"
+    const formInicio = $('#formInicio');
+    const inicioSection = $('#inicio');
+    const panel = $('#panelPrincipal');
+    const bienvenida = $('#bienvenida');
+
+    function validarDNI(value) {
+      return /^\d{6,12}$/.test(value.trim());
+    }
+
+    // Manejo del submit del formulario de inicio
+    formInicio.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const nombres = $('#nombres').value.trim();
+      const dni = $('#dni').value.trim();
+      const email = $('#email').value.trim();
+
+      // Reset validaciones visuales
+      formInicio.classList.remove('was-validated');
+
+      let valido = true;
+
+      if (!nombres || nombres.length < 3) {
+        valido = false;
+        $('#nombres').classList.add('is-invalid');
+      } else {
+        $('#nombres').classList.remove('is-invalid');
+      }
+
+      if (!validarDNI(dni)) {
+        valido = false;
+        $('#dni').classList.add('is-invalid');
+      } else {
+        $('#dni').classList.remove('is-invalid');
+      }
+
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        valido = false;
+        $('#email').classList.add('is-invalid');
+      } else {
+        $('#email').classList.remove('is-invalid');
+      }
+
+      if (!valido) {
+        formInicio.classList.add('was-validated');
+        return;
+      }
+
+      // Guardamos datos en localStorage (solo demo); en producción enviar a servidor seguro
+      const usuario = { nombres, dni, email, ingresadoAt: new Date().toISOString() };
+      localStorage.setItem('denuncia_usuario', JSON.stringify(usuario));
+
+      // Mostrar panel principal
+      inicioSection.style.display = 'none';
+      panel.style.display = 'block';
+      bienvenida.textContent = `Hola, ${nombres.split(' ')[0] || nombres}!`;
+    });
+
+    // Botones del panel principal
+    $('#btnAbrirDenuncia').addEventListener('click', () => {
+      $('#formDenunciaCont').style.display = 'block';
+      $('#btnAbrirDenuncia').disabled = true;
+    });
+
+    $('#btnCerrarSesion').addEventListener('click', () => {
+      localStorage.removeItem('denuncia_usuario');
+      // volver a inicio
+      panel.style.display = 'none';
+      inicioSection.style.display = 'block';
+      formInicio.reset();
+      $('#formInicio').classList.remove('was-validated');
+      $('#btnAbrirDenuncia').disabled = false;
+    });
+
+    // Cancelar denuncia
+    $('#btnCancelarDenuncia').addEventListener('click', () => {
+      $('#formDenunciaCont').style.display = 'none';
+      $('#btnAbrirDenuncia').disabled = false;
+      $('#formDenuncia').reset();
+      $('#msgDenuncia').style.display = 'none';
+    });
+
+    // Envío de denuncia (demo)
+    $('#formDenuncia').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const descripcion = $('#descripcion').value.trim();
+
+      // Validación simple
+      if (!descripcion || descripcion.length < 20) {
+        $('#descripcion').classList.add('is-invalid');
+        return;
+      } else {
+        $('#descripcion').classList.remove('is-invalid');
+      }
+
+      const anon = $('#anonimo').checked;
+      // En demo no se envía a servidor. Simulamos guardado local y mostramos confirmación.
+      const denuncia = {
+        tipo: $('#tipoHecho').value || 'No especificado',
+        descripcion,
+        anonimo: anon,
+        fecha: new Date().toISOString()
+      };
+
+      // Guardamos en localStorage (array)
+      const denunciasPrev = JSON.parse(localStorage.getItem('denuncias_demo') || '[]');
+      denunciasPrev.push(denuncia);
+      localStorage.setItem('denuncias_demo', JSON.stringify(denunciasPrev));
+
+      // Mensaje de éxito
+      const msg = $('#msgDenuncia');
+      msg.style.display = 'block';
+      msg.className = 'alert alert-success';
+      msg.textContent = 'Denuncia guardada localmente (demo). En producción se enviaría a un servidor seguro.';
+
+      // limpiar
+      $('#formDenuncia').reset();
+      $('#btnAbrirDenuncia').disabled = false;
+      $('#formDenunciaCont').style.display = 'none';
+    });
+
+    // Si ya había usuario guardado, mostrar panel directamente (opcional)
+    window.addEventListener('load', () => {
+      const usuario = JSON.parse(localStorage.getItem('denuncia_usuario') || 'null');
+      if (usuario && usuario.nombres) {
+        // ocultar inicio, mostrar panel
+        $('#inicio').style.display = 'none';
+        panel.style.display = 'block';
+        bienvenida.textContent = `Hola, ${usuario.nombres.split(' ')[0] || usuario.nombres}!`;
+      }
+    });
+  </script>
+</body>
+</html>
