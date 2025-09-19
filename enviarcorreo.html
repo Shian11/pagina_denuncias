@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Enviar correo con mailto</title>
+</head>
+<body>
+  <h2>Ejemplo con mailto</h2>
+  <button onclick="enviarMailto()">Enviar correo</button>
+
+  <script>
+    function enviarMailto() {
+      const destinatario = "destino@ejemplo.com";
+      const asunto = "Prueba desde mi página web";
+      const cuerpo = "Hola, este es un correo generado con mailto.";
+      window.location.href = `mailto:${destinatario}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    }
+  </script>
+</body>
+</html>

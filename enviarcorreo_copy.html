@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Enviar correo con EmailJS</title>
+  <!-- Librería de EmailJS -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    form {
+      max-width: 400px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    input, textarea, button {
+      padding: 10px;
+      font-size: 14px;
+    }
+    button {
+      background-color: #0078D7;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005a9e;
+    }
+  </style>
+</head>
+<body>
+  <h2>Formulario de contacto</h2>
+
+  <form id="formulario">
+    <input type="text" id="nombre" placeholder="Tu nombre" required>
+    <input type="email" id="email" placeholder="Tu correo" required>
+    <input type="text" id="titulo" placeholder="Tu correo" required>
+    <textarea id="mensaje" placeholder="Escribe tu mensaje..." required></textarea>
+    <button type="submit">Enviar correo</button>
+  </form>
+
+  <script>
+    // Inicializar EmailJS con tu Public Key
+    (function() {
+      emailjs.init("aws-vqt5HvFTwvZmH"); // 👈 Reemplaza aquí
+    })();
+
+    // Manejar el envío del formulario
+    document.getElementById("formulario").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const templateParams = {
+        from_name: document.getElementById("nombre").value,
+        from_email: document.getElementById("email").value,
+        titulo: document.getElementById("titulo").value,
+        message: document.getElementById("mensaje").value
+      };
+
+      // Enviar con EmailJS
+      emailjs.send("service_0tuuv7b", "template_36oovr6", templateParams) // 👈 Reemplaza aquí
+        .then(function(response) {
+          alert("✅ Correo enviado correctamente");
+          document.getElementById("formulario").reset(); // limpiar formulario
+        }, function(error) {
+          alert("❌ Error al enviar: " + JSON.stringify(error));
+        });
+    });
+  </script>
+</body>
+</html>
